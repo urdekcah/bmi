@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор ИМТ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    * {
+      font-family: 'Pretendard', sans-serif!important;
+    }
+
+    .progress-bar {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-segments {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+    }
+    
+    .segment {
+      height: 100%;
+      transition: opacity 0.3s;
+    }
+    
+    .marker {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border: 3px solid #3b82f6;
+      border-radius: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 0.3s;
+    }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    @media (min-width: 1024px) {
+      .category-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      
+      .category-icon {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .category-card:hover .category-icon {
+        transform: scale(1.1) rotate(-5deg);
+      }
+    }
+
+    .hover-content {
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-trigger:hover .hover-content {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4 py-8 max-w-3xl">
+    <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Калькулятор ИМТ</h1>
+        <p class="text-gray-600">Рассчитайте свой индекс массы тела (ИМТ), введя рост и вес</p>
+      </div>
+
+      <div class="space-y-6">
+        <div class="flex gap-4 mb-6">
+          <button id="adultBtn" class="flex-1 py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-gray-300 transition-colors">
+            Взрослый/Для взрослых
+          </button>
+          <button id="childBtn" class="flex-1 py-2 px-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">
+            Дети и подростки
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label for="height" class="block text-sm font-medium text-gray-700 mb-1">Рост (см)</label>
+            <input type="number" id="height" placeholder="170" 
+                 class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+          </div>
+          <div>
+            <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+            <input type="number" id="weight" placeholder="65" 
+                 class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+          </div>
+        </div>
+
+        <button id="calculateBtn" class="w-full bg-blue-500 text-white py-4 rounded-xl font-medium hover:bg-blue-600 transition-all duration-200 focus:ring-4 focus:ring-blue-200">
+          Рассчитать
+        </button>
+      </div>
+
+      <div id="resultArea" class="mt-8 hidden">
+        <div class="mb-8">
+          <div class="text-center mb-4">
+            <span class="text-4xl font-bold text-gray-900" id="bmiValue">18.5</span>
+            <span class="text-xl text-gray-600 ml-2" id="bmiCategory">(Нормально)</span>
+          </div>
+          
+          <div class="progress-bar">
+            <div class="progress-segments flex h-4 rounded-full overflow-hidden">
+              <div class="segment bg-blue-500" style="width: 46.25%"></div>
+              <div class="segment bg-green-500" style="width: 11.25%"></div>
+              <div class="segment bg-yellow-500" style="width: 5%"></div>
+              <div class="segment bg-orange-500" style="width: 12.5%"></div>
+              <div class="segment bg-red-500" style="width: 12.5%"></div>
+              <div class="segment bg-red-600" style="width: 12.5%"></div>
+            </div>
+            <div class="marker" style="left: 0%"></div>
+          </div>
+          
+          <div class="flex justify-between text-sm text-gray-600 mt-1">
+            <span>0</span>
+            <span>18.5</span>
+            <span>23</span>
+            <span>25</span>
+            <span>30</span>
+            <span>35</span>
+            <span>40+</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-gray-50 p-4 rounded-xl">
+            <h3 class="text-lg font-medium text-gray-800 mb-2">Скорректированный ИМТ</h3>
+            <p id="modifiedBMI" class="text-2xl font-bold text-blue-500"></p>
+            <p class="text-sm text-gray-600 mt-1">Поправка на тип телосложения</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-xl">
+            <h3 class="text-lg font-medium text-gray-800 mb-2">Индекс Пондерала</h3>
+            <p id="ponderalIndex" class="text-2xl font-bold text-purple-500"></p>
+            <p id="piCategory" class="text-sm text-gray-600 mt-1"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Классификация ИМТ</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full bg-blue-400"></div>
+          <span class="text-gray-700">Недостаточный вес: Менее 18.5</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full bg-green-400"></div>
+          <span class="text-gray-700">Нормальный вес: 18.5 - 22.9</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+          <span class="text-gray-700">Избыточный вес: 23.0 - 24.9</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+          <span class="text-gray-700">Ожирение I степени: 25.0 - 29.9</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full bg-red-400"></div>
+          <span class="text-gray-700">Ожирение II степени: 30.0 - 34.9</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full bg-red-600"></div>
+          <span class="text-gray-700">Ожирение III степени: Более 35.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Предупреждение</h3>
+      <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      </button>
+    </div>
+    <p id="errorMessage" class="text-gray-600 mb-4"></p>
+    <div class="text-right">
+      <button id="confirmModal" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+        Хорошо
+      </button>
+    </div>
+    </div>
+  </div>
+
+  <script src="./index.js"></script>
+</body>
+</html>
